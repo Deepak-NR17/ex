@@ -1,16 +1,16 @@
-```groovy
+
 pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "akshatha29/app-image"
+        DOCKER_IMAGE = "deepaknr17/myapp"
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/akshathavishal2901/final.git'
+                git 'https://github.com/Deepak-NR17/ex.git'
             }
         }
 
@@ -55,4 +55,4 @@ pipeline {
         }
     }
 }
-```
+
