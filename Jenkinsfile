@@ -14,13 +14,11 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:latest")
-                }
-            }
-        }
+       stage('Build Docker Image') {
+    steps {
+        bat 'docker build -t %DOCKER_IMAGE%:latest .'
+    }
+}
 
         stage('Login to Docker Hub') {
             steps {
@@ -34,15 +32,15 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-creds') {
-                        docker.image("${DOCKER_IMAGE}:latest").push()
-                    }
-                }
+       stage('Push Docker Image') {
+    steps {
+        script {
+            docker.withRegistry('', 'dockerhub-creds') {
+                docker.image("${DOCKER_IMAGE}:latest").push()
             }
         }
+    }
+}
     }
 
     post {
