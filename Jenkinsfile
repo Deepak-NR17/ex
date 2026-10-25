@@ -1,17 +1,53 @@
-pipeline { agent any
+pipeline {
+    agent any
 
-environment { DOCKER_IMAGE = "deepaknr17/myapp" }
+    environment {
+        DOCKER_IMAGE = "deepaknr17/imagename"
+        IMAGE_TAG = "latest" // Change this to "v1" if you prefer
+    }
 
-stages {
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/Deepak-NR17/ee.git'
+            }
+        }
 
-stage('Clone Repository') { steps { git 'https://github.com/Deepak-NR17/ex.git' } }
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t %DOCKER_IMAGE%:%IMAGE_TAG% .'
+            }
+        }
 
-stage('Build Docker Image') { steps { script { docker.build("${DOCKER_IMAGE}:v1") } } }
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'dockerhub-PAT',
+                    variable: 'DOCKER_PAT'
+                )]) {
+                    bat '''
+                    @echo off
+                    echo %DOCKER_PAT%|docker login -u deepaknr17 --password-stdin
+                    if errorlevel 1 exit /b 1
+                    '''
+                }
+            }
+        }
 
-stage('Login to Docker Hub') { steps { withCredentials([usernamePassword( credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERUSER', passwordVariable: 'DOCKERPASS' )]) { bat 'echo %DOCKERPASS% | docker login -u %DOCKERUSER% --password-stdin' } } }
+        stage('Push Docker Image') {
+            steps {
+                bat 'docker push %DOCKER_IMAGE%:%IMAGE_TAG%'
+            }
+        }
+    }
 
-stage('Push Docker Image') { steps { script { docker.withRegistry('', 'dockerhub-creds') { docker.image("${DOCKER_IMAGE}:v1").push() } } } } }
-
-post { success { echo 'Image successfully built and pushed to Docker Hub' }
-
-failure { echo 'Pipeline failed' } } }
+    post {
+        success {
+            echo 'Docker image built and pushed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
+        }
+    }
+}
