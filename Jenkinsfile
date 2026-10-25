@@ -10,7 +10,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'master',
-                    url: 'https://github.com/Deepak-NR17/ee.git'
+                    url: 'https://github.com/Deepak-NR17/ex.git'
             }
         }
 
